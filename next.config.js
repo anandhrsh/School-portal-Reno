@@ -19,7 +19,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'your-production-domain.com',
+        hostname: 'school-portal-reno.vercel.app',
       },
     ],
   },
