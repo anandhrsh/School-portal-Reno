@@ -27,7 +27,7 @@ export default function ShowSchools() {
             } else {
                 setError(data.error || 'Failed to fetch schools');
             }
-        } catch (err) {
+        } catch {
             setError('An error occurred while fetching schools');
         } finally {
             setLoading(false);
@@ -182,7 +182,7 @@ export default function ShowSchools() {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {filteredSchools.map((school, index) => (
+                            {filteredSchools.map((school) => (
                                 <div
                                     key={school.id}
                                     className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
@@ -191,7 +191,7 @@ export default function ShowSchools() {
                                     <div className="relative h-52 w-full overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
                                         <Image
-                                            src={`/schoolImages/${school.image}`}
+                                            src={school.image}
                                             alt={school.name}
                                             fill
                                             className="object-cover hover:scale-110 transition-transform duration-300"

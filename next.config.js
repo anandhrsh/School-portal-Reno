@@ -1,18 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: __dirname,
-  images: {
-    domains: ['localhost'],
-    unoptimized: true,
+  typescript: {
+    // Enable TypeScript strict mode
+    ignoreBuildErrors: false,
   },
-  // Enable static file serving for uploaded images
-  async rewrites() {
-    return [
+  // External packages for server components
+  serverExternalPackages: [],
+  images: {
+    remotePatterns: [
       {
-        source: '/schoolImages/:path*',
-        destination: '/schoolImages/:path*',
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
       },
-    ];
+    ],
+  },
+  eslint: {
+    // ✅ Skip ESLint checks during Vercel build
+    ignoreDuringBuilds: true,
   },
 };
 

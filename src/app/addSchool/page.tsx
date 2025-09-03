@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -18,6 +18,8 @@ interface FormData {
 export default function AddSchool() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState('');
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupType, setPopupType] = useState<'success' | 'error'>('success');
     const router = useRouter();
 
     const {
@@ -50,15 +52,24 @@ export default function AddSchool() {
 
             if (response.ok) {
                 setSubmitMessage('School added successfully!');
+                setPopupType('success');
+                setShowPopup(true);
                 reset();
                 setTimeout(() => {
+                    setShowPopup(false);
                     router.push('/showSchools');
-                }, 2000);
+                }, 3000);
             } else {
                 setSubmitMessage(result.error || 'Failed to add school');
+                setPopupType('error');
+                setShowPopup(true);
+                setTimeout(() => setShowPopup(false), 4000);
             }
-        } catch (error) {
+        } catch {
             setSubmitMessage('An error occurred while adding the school');
+            setPopupType('error');
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 4000);
         } finally {
             setIsSubmitting(false);
         }
@@ -88,16 +99,92 @@ export default function AddSchool() {
                         </div>
                     </div>
 
-                    {submitMessage && (
-                        <div
-                            className={`mb-8 p-4 rounded-lg font-semibold ${submitMessage.includes('successfully')
-                                    ? 'bg-green-50 text-green-800 border border-green-200'
-                                    : 'bg-red-50 text-red-800 border border-red-200'
-                                }`}
-                        >
-                            {submitMessage.includes('successfully') ? '✅ ' : '❌ '}{submitMessage}
+                    {/* Success/Error Popup Modal */}
+                    {showPopup && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+                            <div 
+                                className={`relative transform transition-all duration-300 ease-out scale-100 ${
+                                    popupType === 'success' 
+                                        ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200' 
+                                        : 'bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200'
+                                } rounded-2xl shadow-2xl max-w-md w-full mx-4`}
+                                style={{
+                                    fontSize: 'clamp(0.875rem, 2.5vw, 1.125rem)',
+                                    padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+                                    minHeight: 'clamp(200px, 25vh, 300px)',
+                                    maxWidth: 'min(90vw, 28rem)'
+                                }}
+                            >
+                                {/* Close button */}
+                                <button
+                                    onClick={() => setShowPopup(false)}
+                                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                                    style={{ fontSize: 'clamp(1.25rem, 3vw, 1.5rem)' }}
+                                >
+                                    ✕
+                                </button>
+
+                                {/* Icon */}
+                                <div className="flex justify-center mb-4">
+                                    <div 
+                                        className={`rounded-full p-3 ${
+                                            popupType === 'success' 
+                                                ? 'bg-green-100 text-green-600' 
+                                                : 'bg-red-100 text-red-600'
+                                        }`}
+                                        style={{ fontSize: 'clamp(2rem, 5vw, 3rem)' }}
+                                    >
+                                        {popupType === 'success' ? '✅' : '❌'}
+                                    </div>
+                                </div>
+
+                                {/* Title */}
+                                <h3 
+                                    className={`text-center font-bold mb-3 ${
+                                        popupType === 'success' ? 'text-green-800' : 'text-red-800'
+                                    }`}
+                                    style={{ fontSize: 'clamp(1.25rem, 3.5vw, 1.75rem)' }}
+                                >
+                                    {popupType === 'success' ? 'Success!' : 'Error!'}
+                                </h3>
+
+                                {/* Message */}
+                                <p 
+                                    className={`text-center font-medium leading-relaxed ${
+                                        popupType === 'success' ? 'text-green-700' : 'text-red-700'
+                                    }`}
+                                    style={{ fontSize: 'clamp(1rem, 2.75vw, 1.125rem)' }}
+                                >
+                                    {submitMessage}
+                                </p>
+
+                                {/* Progress indicator for success */}
+                                {popupType === 'success' && (
+                                    <div className="mt-6">
+                                        <div className="text-center text-green-600 text-sm mb-2">
+                                            Redirecting to schools list...
+                                        </div>
+                                        <div className="w-full bg-green-200 rounded-full h-2">
+                                            <div 
+                                                className="bg-green-500 h-2 rounded-full animate-pulse"
+                                                style={{ 
+                                                    width: '100%',
+                                                    animation: 'progress 3s linear forwards'
+                                                }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
+
+                    <style jsx>{`
+                        @keyframes progress {
+                            from { width: 0%; }
+                            to { width: 100%; }
+                        }
+                    `}</style>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

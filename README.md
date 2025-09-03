@@ -1,22 +1,22 @@
 # School Portal - Web Development Assignment
 
-A Next.js application for managing school data with MySQL database integration. This project allows users to add school information and view schools in an e-commerce style grid layout.
+A Next.js application for managing school data with MySQL database integration and Cloudinary image uploads. This project allows users to add school information and view schools in an e-commerce style grid layout.
 
 ## Features
 
-- **Add School Form**: Responsive form with validation using react-hook-form
-- **School Directory**: E-commerce style grid display of schools
-- **Image Upload**: School images stored in `public/schoolImages` folder
-- **Database Integration**: MySQL database with proper schema
-- **Responsive Design**: Works on both desktop and mobile devices
+- **Add School Form**: Responsive form with validation using `react-hook-form`.
+- **School Directory**: E-commerce style grid display of schools with search functionality.
+- **Cloud Image Upload**: School images are uploaded to Cloudinary for robust and scalable storage.
+- **Database Integration**: MySQL database with a well-defined schema and indexes.
+- **Responsive Design**: Works seamlessly on both desktop and mobile devices.
 
 ## Tech Stack
 
 - **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes
 - **Database**: MySQL
-- **Form Handling**: react-hook-form
-- **Image Handling**: Next.js Image component with file upload
+- **Image Handling**: Cloudinary
+- **Form Handling**: `react-hook-form`
 
 ## Prerequisites
 
@@ -42,38 +42,34 @@ A Next.js application for managing school data with MySQL database integration. 
    CREATE DATABASE school_portal;
    USE school_portal;
    
-   CREATE TABLE schools (
-     id INT AUTO_INCREMENT PRIMARY KEY,
-     name TEXT NOT NULL,
-     address TEXT NOT NULL,
-     city TEXT NOT NULL,
-     state TEXT NOT NULL,
-     contact BIGINT NOT NULL,
-     image TEXT NOT NULL,
-     email_id TEXT NOT NULL
-   );
+   -- Run the script to create the 'schools' table and indexes
+   -- You can use a MySQL client (like MySQL Workbench, DBeaver, or the command line) to execute the file.
+   SOURCE path/to/your/project/database/init.sql;
    ```
 
 4. **Environment Configuration**
-   Create a `.env.local` file in the root directory:
+   Create a `.env.local` file in the root directory and add the following variables:
    ```env
-   DB_HOST=localhost
+   # Database Configuration
+   DB_HOST=your_mysql_host
    DB_USER=your_mysql_username
    DB_PASSWORD=your_mysql_password
    DB_NAME=school_portal
+   DB_PORT=3306
+
+   # Cloudinary Configuration
+   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+   CLOUDINARY_API_KEY=your_cloudinary_api_key
+   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+   CLOUDINARY_UPLOAD_PRESET=your_cloudinary_upload_preset
    ```
 
-5. **Create images directory**
-   ```bash
-   mkdir public/schoolImages
-   ```
-
-6. **Run the development server**
+5. **Run the development server**
    ```bash
    npm run dev
    ```
 
-7. **Open your browser**
+6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Project Structure
@@ -91,11 +87,13 @@ school-portal/
 │   │   │       └── route.ts      # API endpoints for schools
 │   │   └── page.tsx              # Home page (redirects to showSchools)
 │   ├── lib/
+│   │   ├── cloudinary.ts         # Cloudinary configuration
 │   │   └── db.ts                 # Database connection
 │   └── types/
 │       └── school.ts             # TypeScript interfaces
-├── public/
-│   └── schoolImages/             # Uploaded school images
+├── public/                     # Static assets
+├── database/
+│   └── init.sql                # Database schema initialization script
 └── README.md
 ```
 
@@ -115,7 +113,7 @@ Fetches all schools from the database.
       "city": "New York",
       "state": "NY",
       "contact": 1234567890,
-      "image": "school_1234567890.jpg",
+      "image": "https://res.cloudinary.com/.../image/upload/v123/school.jpg",
       "email_id": "contact@example.com"
     }
   ]
@@ -165,40 +163,52 @@ The application is fully responsive and optimized for:
 ### Vercel Deployment
 
 1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Initial commit"
-   git push origin main
-   ```
+   Ensure your project is in a public GitHub repository.
 
 2. **Deploy on Vercel**
-   - Connect your GitHub repository to Vercel
-   - Add environment variables in Vercel dashboard
-   - Deploy
+   - Sign up or log in to [Vercel](https://vercel.com).
+   - Click "Add New..." > "Project".
+   - Import your GitHub repository.
+   - During the setup, expand the "Environment Variables" section.
+   - Add all the variables from your `.env.local` file (both Database and Cloudinary variables).
+   - Click "Deploy". Vercel will automatically build and host your application.
 
 ### Environment Variables for Production
 
-Set these in your hosting platform:
+Set these in your hosting platform's dashboard (e.g., Vercel):
 
 ```
+# Database Configuration
 DB_HOST=your_production_db_host
 DB_USER=your_production_db_user
 DB_PASSWORD=your_production_db_password
-DB_NAME=school_portal
+DB_NAME=your_production_db_name
+DB_PORT=3306
+
+# Cloudinary Configuration
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+CLOUDINARY_UPLOAD_PRESET=your_cloudinary_upload_preset
 ```
 
 ## Database Schema
 
+The full database schema is defined in the `database/init.sql` file. It includes the table structure, data types, and indexes for performance.
+
 ```sql
-CREATE TABLE schools (
+-- Create schools table for the school portal application
+CREATE TABLE IF NOT EXISTS schools (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name TEXT NOT NULL,
+  name VARCHAR(255) NOT NULL,
   address TEXT NOT NULL,
-  city TEXT NOT NULL,
-  state TEXT NOT NULL,
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(100) NOT NULL,
   contact BIGINT NOT NULL,
-  image TEXT NOT NULL,
-  email_id TEXT NOT NULL
+  image VARCHAR(255) NOT NULL,
+  email_id VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 ```
 
