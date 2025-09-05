@@ -1,7 +1,9 @@
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: '.env.local' });
+
+// Always load .env.local from the project root (../.env.local relative to this script)
+require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
 
 async function setupDatabase() {
   let connection;
@@ -13,12 +15,15 @@ async function setupDatabase() {
       user: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD || '',
       port: process.env.DB_PORT || 3306,
+      // Use SSL for Clever Cloud; allow self-signed certs
+      ssl: { rejectUnauthorized: false }
     });
 
     console.log('Connected to MySQL server');
 
     // Create database if it doesn't exist
     const dbName = process.env.DB_NAME || 'school_portal';
+    console.log(`Ensuring database exists: ${dbName}`);
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
     console.log(`Database '${dbName}' created or already exists`);
 
